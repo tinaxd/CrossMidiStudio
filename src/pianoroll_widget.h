@@ -48,11 +48,13 @@ public:
 private:
 	void OnPaint(wxPaintEvent &event);
 	void OnLeftClick(wxMouseEvent &event);
+	void OnScroll(wxScrollWinEvent &event);
 
 	wxDECLARE_EVENT_TABLE();
 
 protected:
-	virtual void DrawKeyboard(wxGraphicsContext *gc);
+	virtual void DrawKeyboard(wxGraphicsContext &gc);
+	virtual void DrawTimeline(wxGraphicsContext &gc);
 
 	double white_width = 60;
 	double white_height = 30;
@@ -60,6 +62,10 @@ protected:
 	double black_height = 20;
 	double pianoroll_leftmargin = 5;
 	double pianoroll_upmargin = 25;
+	double max_width = 2000;
+
+	int measure_division = 4;
+	double measure_width = 300;
 };
 
 
@@ -90,7 +96,7 @@ private:
 // Gtk::ScrolledWindow *scwindow;
 // Gtk::Viewport *viewport;
 
-// Gtk::Paned *paned;
+	wxBoxSizer *topsizer; 
 // Gtk::DrawingArea *automation;
 // Gtk::ScrolledWindow *scautomation;
 // Gtk::Box *automation_box;
@@ -125,14 +131,8 @@ private:
 // void draw_note(MidiNote note);
 // virtual void update_notes_drawing(const Cairo::RefPtr<Cairo::Context>& cr);
 // virtual void draw_gridhelper(const Cairo::RefPtr<Cairo::Context>& cr);
-// virtual void draw_timeline(const Cairo::RefPtr<Cairo::Context>& cr);
 
 // virtual void automation_draw_timeline(const Cairo::RefPtr<Cairo::Context>& cr);
 // virtual void automation_draw_graph(const Cairo::RefPtr<Cairo::Context>& cr);
 
-
-// double max_width = 100;
-
-// int measure_division = 4;
-// double measure_width = 300;
 };
