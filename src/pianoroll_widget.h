@@ -6,6 +6,8 @@
 	#include <wx/wx.h>
 #endif
 
+#include <wx/splitter.h>
+
 #include <queue>
 #include <vector>
 #include <stack>
@@ -38,23 +40,20 @@ auto drawcord_comp = [](DrawCord x, DrawCord y) {
             return x.x > y.x;
 };
 
+// Declaration
+class PianorollWidget;
+class PianorollCanvas;
+class ControlChangeGraph;
+
 class PianorollCanvas : public wxScrolledCanvas
 {
 public:
 	PianorollCanvas(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, const wxString &name);
 	virtual ~PianorollCanvas();
 
+	void GetScrollOffset(int& x_start, int& y_start);
 
-private:
-	void OnPaint(wxPaintEvent &event);
-	void OnLeftClick(wxMouseEvent &event);
-	void OnScroll(wxScrollWinEvent &event);
-
-	wxDECLARE_EVENT_TABLE();
-
-protected:
-	virtual void DrawKeyboard(wxGraphicsContext &gc);
-	virtual void DrawTimeline(wxGraphicsContext &gc);
+	void SetControlChangeGraph(ControlChangeGraph& ccGraph);
 
 	double white_width = 60;
 	double white_height = 30;
@@ -66,6 +65,50 @@ protected:
 
 	int measure_division = 4;
 	double measure_width = 300;
+
+	double key_heights[127];
+
+private:
+	void OnPaint(wxPaintEvent &event);
+	void OnLeftClick(wxMouseEvent &event);
+	void OnScroll(wxScrollWinEvent &event);
+
+	wxDECLARE_EVENT_TABLE();
+
+protected:
+	ControlChangeGraph *ccGraph;
+	/*
+	virtual void DrawKeyboard(wxGraphicsContext &gc);
+	virtual void DrawTimeline(wxGraphicsContext &gc);
+	virtual void DrawGridhelper(wxGraphicsContext &gc);
+	*/
+	virtual void DrawKeyboard(wxDC &dc);
+	virtual void DrawTimeline(wxDC &dc);
+	virtual void DrawGridhelper(wxDC &dc);
+
+};
+
+class ControlChangeGraph : public wxWindow
+{
+public:
+	ControlChangeGraph(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, const wxString &name);
+	virtual ~ControlChangeGraph();
+
+	void SetPianorollCanvas(PianorollCanvas& pianorollCanvas);
+	void SetHScroll(int scroll);
+
+private:
+	int hScroll; // in pixels
+
+	void OnLeftClick(wxMouseEvent &event);
+	void OnPaint(wxPaintEvent &event);
+
+protected:
+	PianorollCanvas* pianorollCanvas;
+
+	virtual void DrawTimeline(wxDC &dc);
+
+	wxDECLARE_EVENT_TABLE();
 };
 
 
@@ -85,26 +128,22 @@ public:
 // void reset_with_notes(smf::MidiEventList event_list);
 // void add_midi_note(smf::MidiEvent event);
 
-// void request_redraw();
+	void RequestRedrawAll();
 // void request_automation_redraw();
-
-// void update_size_request();
 
 private:
 // Vector<MidiEvent> midiInfo;
 	PianorollCanvas *scWindow;
-// Gtk::ScrolledWindow *scwindow;
-// Gtk::Viewport *viewport;
+	ControlChangeGraph *scAutomation;
 
-	wxBoxSizer *topsizer; 
-// Gtk::DrawingArea *automation;
-// Gtk::ScrolledWindow *scautomation;
-// Gtk::Box *automation_box;
-// Gtk::Toolbar *automation_toolbar;
+	wxBoxSizer *topsizer;
+	wxSplitterWindow *topsplitter; 
+	
+	wxBoxSizer *automationBox;
 
-// Gtk::ToolButton *automation_test_button;
+	wxToolBar *automationToolBar;
+	wxButton *automationTestButton;
 
-// bool drawarea_on_draw(const Cairo::RefPtr<Cairo::Context>& cr);
 // bool automation_on_draw(const Cairo::RefPtr<Cairo::Context>& cr);
 //bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr);
 //std::queue<DrawCord> drawing_queue;
@@ -120,8 +159,6 @@ private:
 
 // double y_scale = 5.0;
 // double x_scale = 5.0;
-
-// double key_heights[127];
 
 // int resolution = 480;
 // double tempo = 120;

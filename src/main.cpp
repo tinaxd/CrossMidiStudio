@@ -21,6 +21,9 @@ private:
 	void OnFile(wxCommandEvent &event);
 	void OnExit(wxCommandEvent &event);
 	void OnAbout(wxCommandEvent &event);
+	void OnRedrawRequest(wxCommandEvent &event);
+
+	PianorollWidget *piano;
 
 wxDECLARE_EVENT_TABLE();
 };
@@ -28,13 +31,15 @@ wxDECLARE_EVENT_TABLE();
 
 enum
 {
-	ID_File = 1
+	ID_File = 1,
+	ID_REDRAWALL
 };
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(ID_File, MainFrame::OnFile)
 	EVT_MENU(wxID_EXIT, MainFrame::OnExit)
 	EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
+	EVT_MENU(ID_REDRAWALL, MainFrame::OnRedrawRequest)
 wxEND_EVENT_TABLE()
 
 wxIMPLEMENT_APP(CrossMidiStudio);
@@ -55,6 +60,7 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 	menuFile->Append(wxID_EXIT);
 
 	wxMenu *menuHelp = new wxMenu();
+	menuHelp->Append(ID_REDRAWALL, "&Request redraw", "Redraw pianoroll");
 	menuHelp->Append(wxID_ABOUT);
 
 	wxMenuBar *menuBar = new wxMenuBar();
@@ -79,6 +85,12 @@ void MainFrame::OnAbout(wxCommandEvent &event)
 
 void MainFrame::OnFile(wxCommandEvent &event)
 {
-	PianorollWidget *piano = new PianorollWidget(this, wxID_ANY, wxPoint(50, 50), wxSize(600, 700), "Pianoroll");
+	piano = new PianorollWidget(this, wxID_ANY, wxPoint(50, 50), wxSize(600, 700), "Pianoroll");
 	piano->Show(true);
+}
+
+void MainFrame::OnRedrawRequest(wxCommandEvent &event)
+{
+	if (piano != nullptr)
+		piano->RequestRedrawAll();
 }
