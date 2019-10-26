@@ -68,6 +68,8 @@ public:
 
 	double key_heights[127];
 
+	std::vector<MidiNote> notes;
+
 private:
 	void OnPaint(wxPaintEvent &event);
 	void OnLeftClick(wxMouseEvent &event);
@@ -85,6 +87,9 @@ protected:
 	virtual void DrawKeyboard(wxDC &dc);
 	virtual void DrawTimeline(wxDC &dc);
 	virtual void DrawGridhelper(wxDC &dc);
+	virtual void DrawAllNotes(wxDC &dc);
+
+	std::queue<DrawCord> note_drawed;
 
 };
 
@@ -117,7 +122,6 @@ class PianorollWidget: public wxWindow
 public:
 	PianorollWidget(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, const wxString &name);
 	virtual ~PianorollWidget();
-// void add_note(MidiNote note);
 
 // void set_x_scale(double scale);
 // void set_y_scale(double scale);
@@ -125,8 +129,8 @@ public:
 // void calculate_note_positions();
 // void calculate_automation_graph();
 
-// void reset_with_notes(smf::MidiEventList event_list);
-// void add_midi_note(smf::MidiEvent event);
+	void ResetWithNotes(smf::MidiEventList event_list);
+	void AddMidiNote(smf::MidiEvent event);
 
 	void RequestRedrawAll();
 // void request_automation_redraw();
@@ -148,11 +152,9 @@ private:
 //bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr);
 //std::queue<DrawCord> drawing_queue;
 
-//std::queue<DrawCord> note_drawed;
 // std::priority_queue<DrawCord, std::vector<DrawCord>, decltype(drawcord_comp)> *automation_drawed;
 // std::array<std::stack<smf::MidiEvent>, 128> _note_tmp;
 
-// std::vector<MidiNote> notes;
 // std::vector<AutomationPoint> automation_values;
 
 // bool draw_initialized;

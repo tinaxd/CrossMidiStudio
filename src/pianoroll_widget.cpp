@@ -266,6 +266,32 @@ void PianorollCanvas::GetScrollOffset(int& x_start, int& y_start)
 	GetViewStart(&x_start, &y_start);
 }
 
+void PianorollWindow::CalculateNotePositions()
+{
+    for (auto it=notes.begin(); it!=notes.end(); it++) {
+        auto note = *it;
+        //std::cout << key_heights[127-note.note] << std::endl;
+        DrawCord cord = DrawCord {note.start / resolution * QUARTER_LENGTH, key_heights[127-note.note], note.length / resolution * QUARTER_LENGTH};
+        this->note_drawed.push(cord);
+    }
+}
+
+void PianorollCanvas::DrawAllNotes(wxDC &dc)
+{
+	dc.SetPen(*wxRED_PEN);
+    const double key_height = white_height * 7 / 12;
+
+    while (!note_drawed.empty())
+    {
+        DrawCord cord = note_drawed.front();
+        //std::cout << "Cord: " << cord.x << ", " << cord.y << std::endl;
+        cr->rectangle(cord.x, cord.y, cord.length, key_height);
+        cr->fill();
+
+        note_drawed.pop();
+    }
+}
+
 void ControlChangeGraph::SetPianorollCanvas(PianorollCanvas& canvas)
 {
 	this->pianorollCanvas = &canvas;

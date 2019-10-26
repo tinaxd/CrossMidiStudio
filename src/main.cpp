@@ -55,7 +55,7 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 	: wxFrame(NULL, wxID_ANY, title, pos, size)
 {
 	wxMenu *menuFile = new wxMenu();
-	menuFile->Append(ID_File, "&File...\tCtrl-H", "Open a file");
+	menuFile->Append(ID_File, "&Open a file...\tCtrl-H", "Open a file");
 	menuFile->AppendSeparator();
 	menuFile->Append(wxID_EXIT);
 
