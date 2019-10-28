@@ -152,7 +152,13 @@ void MainFrame::OnAbout(wxCommandEvent &event) {
 }
 
 void MainFrame::OnFile(wxCommandEvent &event) {
-  ReadMidiFile("./cola-kisu.mid");
+	wxFileDialog openFileDialog(this, "Open midi file", wxEmptyString, wxEmptyString, "smf (*.mid)|*.mid", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+	if (openFileDialog.ShowModal() == wxID_CANCEL)
+		return;
+
+	std::string filepath = openFileDialog.GetPath().ToStdString(); // TODO
+  ReadMidiFile(filepath);
 
   if (midifile == nullptr)
     return;
