@@ -1,5 +1,4 @@
 *.bmp
-*.xpm
 src/drawing.cpp
 *.exe
 *.dll
