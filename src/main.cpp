@@ -43,6 +43,7 @@ private:
 
   MidiPlayer *mp;
   BackgroundMidiPlayer *bmp;
+  friend class BackgroundMidiPlayer;
 
   wxDECLARE_EVENT_TABLE();
 };
@@ -171,6 +172,8 @@ void MainFrame::OnFile(wxCommandEvent &event) {
   }
 
   ResetEditViewWithTrack(0);
+
+  GetStatusBar()->SetStatusText("smf loaded");
 }
 
 void MainFrame::OnRedrawRequest(wxCommandEvent &event) {
