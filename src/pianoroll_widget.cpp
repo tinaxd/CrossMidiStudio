@@ -11,6 +11,11 @@
 
 #define GET_SCROLL_OFFSET(x, y) int x, y; GetViewStart(&x, &y); x *= SCROLL_RATE_H; y *= SCROLL_RATE_V
 
+#define QUARTER_LENGTH (measure_width / measure_division)
+
+using namespace cms;
+
+// clang-format off
 wxBEGIN_EVENT_TABLE(PianorollCanvas, wxScrolledCanvas)
 	EVT_PAINT(PianorollCanvas::OnPaint)
 	EVT_LEFT_DOWN(PianorollCanvas::OnLeftClick)
@@ -21,6 +26,7 @@ wxBEGIN_EVENT_TABLE(ControlChangeGraph, wxScrolledCanvas)
 	EVT_PAINT(ControlChangeGraph::OnPaint)
 	EVT_LEFT_DOWN(ControlChangeGraph::OnLeftClick)
 wxEND_EVENT_TABLE()
+// clang-format on
 
 PianorollWidget::PianorollWidget(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, const wxString &name)
 	: wxWindow(parent, id, pos, size, wxBORDER_SIMPLE, name)
@@ -54,6 +60,46 @@ PianorollWidget::PianorollWidget(wxWindow *parent, wxWindowID id, const wxPoint 
 PianorollWidget::~PianorollWidget()
 {
 
+}
+
+void PianorollWidget::AddMidiNote(smf::MidiEvent event)
+{
+    if (event.isNoteOn()) {
+        short key = event[1];
+        short velocity = event[2];
+        //std::cout << "raw velocity: " << velocity << std::endl;
+        _note_tmp[key].push(event);
+    } else if (event.isNoteOff()) {
+        if (_note_tmp.empty())
+            return;
+        short key = event[1];
+        smf::MidiEvent on_event = _note_tmp[key].top();
+        MidiNote note = {
+            key,
+            event.tick - on_event.tick,
+            on_event.tick,
+        };
+        scWindow->notes.push_back(note);
+        _note_tmp[key].pop();
+        std::cout << "New note! note: " << key << " time(tick): " << on_event.tick << "(length " << event.tick - on_event.tick << ")" << std::endl;
+
+        // AutomationPoint ap = {
+        //     on_event[2], // velocity
+        //     on_event.tick,
+        // };
+        // automation_values.push_back(ap);
+        //std::cout << "New AutoPoint! time(tick): " << on_event.tick << " value: " << on_event[2] << std::endl;
+
+        if (event.tick > scWindow->max_width) {
+            scWindow->max_width = event.tick / scWindow->resolution * (scWindow->measure_width / scWindow->measure_division) + 10 * scWindow->measure_width;
+            //update_size_request();
+        }
+    }
+}
+
+void PianorollWidget::ClearMidiNotes()
+{
+	scWindow->notes.clear();
 }
 
 void PianorollWidget::RequestRedrawAll()
@@ -142,6 +188,10 @@ void PianorollCanvas::OnPaint(wxPaintEvent &event)
 	init_transform.Translate(x_start, -y_start + pianoroll_upmargin);
 	dc.SetTransformMatrix(init_transform);
     DrawKeyboard(dc);
+
+    dc.SetTransformMatrix(transform);
+    CalculateNotePositions();
+    DrawAllNotes(dc);
 }
 
 void PianorollCanvas::DrawKeyboard(wxDC &dc)
@@ -237,20 +287,30 @@ void PianorollCanvas::DrawGridhelper(wxDC &dc)
     int key_index = 3;
     int octave_index = 0;
     for (int i=0; i<127; i++) {
-        if (key_index == 11) {
+        if (key_index == 12) {
             key_index = 0;
             octave_index++;
+            i--;
             continue;
         } else if (key_index == 0) {
-            dc.SetPen(wxPen(wxColour(51, 51, 51), 1.8));
+            dc.SetPen(wxPen(wxColour(51, 51, 51), 2));
             last_base_white = (7 * octave_index - 2) * white_height;
-            dc.DrawRectangle(0, last_base_white, pianoroll_width, key_height);
+            //dc.DrawRectangle(0, last_base_white, pianoroll_width, key_height);
+            dc.DrawLine(0, last_base_white, pianoroll_width, last_base_white);
             //std::cout << "set: " << last_base_white << std::endl;
             key_heights[i] = last_base_white;
             dc.SetPen(wxPen(wxColour(200, 200, 200), 1));
+        } else if (key_index == 1 || key_index == 3 || key_index == 5 || key_index == 8 || key_index == 10) {
+        	double y = last_base_white + key_height * key_index;
+        	dc.SetPen(wxPen(wxColour(200, 200, 200), 1));
+        	dc.SetBrush(wxBrush(wxColour(231, 255, 241), wxBRUSHSTYLE_SOLID));
+        	dc.DrawRectangle(0, y, pianoroll_width, key_height);
+        	dc.SetBrush(*wxTRANSPARENT_BRUSH);
+        	key_heights[i] = y;
         } else {
             double y = last_base_white + key_height * key_index;
-            dc.DrawRectangle(0, y, pianoroll_width, key_height);
+            //dc.DrawRectangle(0, y, pianoroll_width, key_height);
+            dc.DrawLine(0, y, pianoroll_width, y);
             //std::cout << "set: " << y << std::endl;
             key_heights[i] = y;
         }
@@ -266,27 +326,27 @@ void PianorollCanvas::GetScrollOffset(int& x_start, int& y_start)
 	GetViewStart(&x_start, &y_start);
 }
 
-void PianorollWindow::CalculateNotePositions()
+void PianorollCanvas::CalculateNotePositions()
 {
     for (auto it=notes.begin(); it!=notes.end(); it++) {
         auto note = *it;
         //std::cout << key_heights[127-note.note] << std::endl;
-        DrawCord cord = DrawCord {note.start / resolution * QUARTER_LENGTH, key_heights[127-note.note], note.length / resolution * QUARTER_LENGTH};
+        DrawCord cord = DrawCord {double(note.start) / resolution * QUARTER_LENGTH, key_heights[128-note.note], double(note.length) / resolution * QUARTER_LENGTH};
         this->note_drawed.push(cord);
     }
 }
 
 void PianorollCanvas::DrawAllNotes(wxDC &dc)
 {
-	dc.SetPen(*wxRED_PEN);
+	dc.SetPen(*wxBLACK_PEN);
+	dc.SetBrush(*wxBLUE_BRUSH);
     const double key_height = white_height * 7 / 12;
 
     while (!note_drawed.empty())
     {
         DrawCord cord = note_drawed.front();
         //std::cout << "Cord: " << cord.x << ", " << cord.y << std::endl;
-        cr->rectangle(cord.x, cord.y, cord.length, key_height);
-        cr->fill();
+        dc.DrawRectangle(cord.x, cord.y, cord.length, key_height);
 
         note_drawed.pop();
     }
