@@ -353,6 +353,14 @@ void PianorollCanvas::DrawAllNotes(wxDC &dc) {
   }
 }
 
+int PianorollCanvas::GetTickBar() {
+
+}
+
+void PianorollCanvas::SetTickBar() {
+  
+}
+
 void ControlChangeGraph::SetPianorollCanvas(PianorollCanvas &canvas) {
   this->pianorollCanvas = &canvas;
 }

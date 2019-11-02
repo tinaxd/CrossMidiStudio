@@ -50,6 +50,9 @@ public:
 
   void SetControlChangeGraph(ControlChangeGraph &ccGraph);
 
+  void SetTickBar(int tick);
+  int GetTickBar();
+
   double white_width = 60;
   double white_height = 30;
   double black_width = 25;
@@ -71,6 +74,8 @@ private:
   void OnPaint(wxPaintEvent &event);
   void OnLeftClick(wxMouseEvent &event);
   void OnScroll(wxScrollWinEvent &event);
+
+  int curr_tick;
 
   wxDECLARE_EVENT_TABLE();
 

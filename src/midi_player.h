@@ -39,10 +39,12 @@ public:
   virtual ~BackgroundMidiPlayer();
 
   void SetMidiFile(const smf::MidiFile &mf);
+  void SetTickOffset(int tick);
 
 private:
   std::unique_ptr<MidiPlayer> mp;
   smf::MidiFile *copied_mf;
+  int tick_offset;
 
   virtual wxThread::ExitCode Entry();
 };

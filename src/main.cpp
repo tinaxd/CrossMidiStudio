@@ -235,6 +235,7 @@ void MainFrame::OnPlay(wxCommandEvent &event) {
 		return;
 	}
 	bmp->SetMidiFile(*midifile);
+  bmp->SetTickOffset(piano->GetTickBar());
 	bmp->Run();
 }
 

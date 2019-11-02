@@ -38,6 +38,10 @@ void MidiPlayer::SetOutputPort(unsigned int portNum) {
   midiout->openPort(portNum);
 }
 
+void BackgroundMidiPlayer::SetTickOffset(int tick) {
+  this->tick_offset = tick;
+}
+
 BackgroundMidiPlayer::BackgroundMidiPlayer(MidiPlayer *mp) {
   this->mp.reset(std::move(mp));
 }
@@ -48,10 +52,20 @@ void BackgroundMidiPlayer::SetMidiFile(const smf::MidiFile &mf) {
   this->copied_mf = new smf::MidiFile(mf);
   copied_mf->doTimeAnalysis();
   copied_mf->joinTracks();
+  copied_mf->absoluteTicks();
 }
 
 wxThread::ExitCode BackgroundMidiPlayer::Entry() {
-  for (int e = 0; e < (*copied_mf)[0].size(); e++) {
+  int offset = 0;
+  if (tick_offset > 0) {
+    for (int i=0; i<(*copied_mf)[0].size(); i++) {
+      if ((*copied_mf)[0][i].tick > tick_offset) {
+        offset = i;
+        break;
+      }
+    }
+  }
+  for (int e = offset; e < (*copied_mf)[0].size(); e++) {
     if (TestDestroy())
       break;
     smf::MidiEvent *mev = &(*copied_mf)[0][e];
