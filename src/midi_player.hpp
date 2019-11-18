@@ -10,7 +10,7 @@
 
 #if _WIN32
     #include <Windows.h>
-    #define ISLEEP(ms) ({Sleep(ms);})
+    #define ISLEEP(ms) do {Sleep(ms);} while (false)
 #elif __linux__
     #include <time.h>
     #define ISLEEP(ms) ({const struct timespec ts {0, (ms)*1000000}; nanosleep(&ts, NULL);})

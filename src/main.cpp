@@ -16,6 +16,8 @@ public:
   virtual bool OnInit();
 };
 
+wxDECLARE_APP(CrossMidiStudio);
+
 class MainFrame : public wxFrame {
 public:
   MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);

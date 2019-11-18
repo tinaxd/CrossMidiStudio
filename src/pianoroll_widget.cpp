@@ -102,11 +102,13 @@ void PianorollWidget::AddMidiNote(smf::MidiEvent event) {
     // << on_event[2] << std::endl;
 
     if (event.tick > scWindow->max_width) {
+			// update window's size request (maybe unnecessary)
       scWindow->max_width =
           event.tick / scWindow->resolution *
               (scWindow->measure_width / scWindow->measure_division) +
           10 * scWindow->measure_width;
-      // update_size_request();
+			// expand scrollbar
+			scWindow->GetScroll
     }
   }
 }
@@ -138,7 +140,7 @@ PianorollCanvas::PianorollCanvas(wxWindow *parent, wxWindowID id,
                                  const wxPoint &pos, const wxSize &size,
                                  const wxString &name)
     : wxScrolledCanvas() {
-  // SetBackgroundStyle(wxBG_STYLE_PAINT);
+  //SetBackgroundStyle(wxBG_STYLE_PAINT);
   Create(parent, id, pos, size, wxHSCROLL | wxVSCROLL, name);
 
   SetScrollbars(SCROLL_RATE_H, SCROLL_RATE_V, 200, 240);
@@ -163,7 +165,7 @@ void PianorollCanvas::OnScroll(wxScrollWinEvent &event) {
 }
 
 void PianorollCanvas::OnPaint(wxPaintEvent &event) {
-  // wxAutoBufferedPaintDC dc(this);
+  //wxAutoBufferedPaintDC dc(this);
   wxPaintDC dc(this);
   DoPrepareDC(dc);
 
@@ -443,5 +445,5 @@ void ControlChangeGraph::OnLeftClick(wxMouseEvent &event) {
 void ControlChangeGraph::SetHScroll(int scroll) {
   this->hScroll = scroll;
   Refresh();
-  Update();
+  //Update();
 }
