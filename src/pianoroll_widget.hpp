@@ -134,6 +134,9 @@ public:
 
   void RequestRedrawAll();
   // void request_automation_redraw();
+  
+  int GetTickBar();
+  void SetTickBar(int tick);
 
 private:
   // Vector<MidiEvent> midiInfo;

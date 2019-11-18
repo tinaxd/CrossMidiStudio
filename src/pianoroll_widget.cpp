@@ -1,4 +1,4 @@
-#include "pianoroll_widget.h"
+#include "pianoroll_widget.hpp"
 
 #include <iostream>
 #include <wx/dcbuffer.h>
@@ -122,6 +122,16 @@ void PianorollWidget::RequestRedrawAll() {
     scAutomation->Refresh();
     scAutomation->Update();
   }
+}
+
+int PianorollWidget::GetTickBar()
+{
+    return 0; // TODO
+}
+
+void PianorollWidget::SetTickBar(int tick)
+{
+    return; // TODO
 }
 
 PianorollCanvas::PianorollCanvas(wxWindow *parent, wxWindowID id,
@@ -351,14 +361,6 @@ void PianorollCanvas::DrawAllNotes(wxDC &dc) {
 
     note_drawed.pop();
   }
-}
-
-int PianorollCanvas::GetTickBar() {
-
-}
-
-void PianorollCanvas::SetTickBar() {
-  
 }
 
 void ControlChangeGraph::SetPianorollCanvas(PianorollCanvas &canvas) {

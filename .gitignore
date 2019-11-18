@@ -2,3 +2,4 @@
 src/drawing.cpp
 *.exe
 *.dll
+build/

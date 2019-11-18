@@ -4,8 +4,8 @@
 #include <wx/wx.h>
 #endif
 
-#include "./pianoroll_widget.h"
-#include "./midi_player.h"
+#include "./pianoroll_widget.hpp"
+#include "./midi_player.hpp"
 
 #include "../ext/midifile/include/MidiFile.h"
 
@@ -235,7 +235,7 @@ void MainFrame::OnPlay(wxCommandEvent &event) {
 		return;
 	}
 	bmp->SetMidiFile(*midifile);
-  bmp->SetTickOffset(piano->GetTickBar());
+    bmp->SetTickOffset(piano->GetTickBar());
 	bmp->Run();
 }
 

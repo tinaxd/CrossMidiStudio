@@ -1,4 +1,4 @@
-#include "./midi_player.h"
+#include "./midi_player.hpp"
 
 using namespace cms;
 

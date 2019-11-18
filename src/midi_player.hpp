@@ -9,8 +9,11 @@
 #include "../ext/rtmidi/RtMidi.h"
 
 #if _WIN32
-#include <Windows.h>
-#define ISLEEP(ms) Sleep(ms);
+    #include <Windows.h>
+    #define ISLEEP(ms) ({Sleep(ms);})
+#elif __linux__
+    #include <time.h>
+    #define ISLEEP(ms) ({const struct timespec ts {0, (ms)*1000000}; nanosleep(&ts, NULL);})
 #endif
 
 namespace cms {
