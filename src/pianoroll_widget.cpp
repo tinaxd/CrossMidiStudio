@@ -88,7 +88,7 @@ void PianorollWidget::AddMidiNote(smf::MidiEvent event) {
         event.tick - on_event.tick,
         on_event.tick,
     };
-    scWindow->notes.push_back(note);
+    scWindow->notes.insert(note);
     _note_tmp[key].pop();
     std::cout << "New note! note: " << key << " time(tick): " << on_event.tick
               << "(length " << event.tick - on_event.tick << ")" << std::endl;
@@ -108,7 +108,8 @@ void PianorollWidget::AddMidiNote(smf::MidiEvent event) {
               (scWindow->measure_width / scWindow->measure_division) +
           10 * scWindow->measure_width;
 			// expand scrollbar
-			scWindow->GetScroll
+			wxPoint before = scWindow->GetViewStart();
+			scWindow->SetScrollbars(SCROLL_RATE_H, SCROLL_RATE_V, scWindow->max_width/SCROLL_RATE_H, 240, before.x, before.y);
     }
   }
 }
@@ -134,6 +135,18 @@ int PianorollWidget::GetTickBar()
 void PianorollWidget::SetTickBar(int tick)
 {
     return; // TODO
+}
+
+int PianorollCanvas::TickToHorizontalPosition(int tick)
+{
+	wxPoint start = GetViewStart();
+	return start.x * resolution / measure_division;
+}
+
+int PianorollCanvas::HorizontalPositionToTick(int hpos)
+{
+	wxPoint start = GetViewStart();
+	return (hpos - start.x) * resolution / measure_division;
 }
 
 PianorollCanvas::PianorollCanvas(wxWindow *parent, wxWindowID id,
@@ -341,8 +354,14 @@ void PianorollCanvas::GetScrollOffset(int &x_start, int &y_start) {
 }
 
 void PianorollCanvas::CalculateNotePositions() {
-  for (auto it = notes.begin(); it != notes.end(); it++) {
-    auto note = *it;
+	size_t count = notes.size();
+	int view_start_tick = HorizontalPositionToTick(GetViewStart().x);
+	for (auto it = notes.cbegin(); it != notes.cend(); it++) {
+		auto note = *it;
+		if (note.start < view_start_tick)
+			continue;
+		else if (note.start > view_start_tick)
+			break;
     // std::cout << key_heights[127-note.note] << std::endl;
     DrawCord cord = DrawCord{double(note.start) / resolution * QUARTER_LENGTH,
                              key_heights[128 - note.note],
@@ -354,7 +373,7 @@ void PianorollCanvas::CalculateNotePositions() {
 void PianorollCanvas::DrawAllNotes(wxDC &dc) {
   dc.SetPen(*wxBLACK_PEN);
   dc.SetBrush(*wxBLUE_BRUSH);
-  const double key_height = white_height * 7 / 12;
+  double key_height = white_height * 7 / 12;
 
   while (!note_drawed.empty()) {
     DrawCord cord = note_drawed.front();

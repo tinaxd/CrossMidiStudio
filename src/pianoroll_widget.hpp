@@ -12,6 +12,7 @@
 #include <queue>
 #include <stack>
 #include <vector>
+#include <set>
 
 #include "../ext/midifile/include/MidiEventList.h"
 
@@ -35,6 +36,12 @@ struct AutomationPoint {
 
 auto drawcord_comp = [](DrawCord x, DrawCord y) { return x.x > y.x; };
 
+struct _midinote_tick_comp
+{
+	bool operator() (const MidiNote& m1, const MidiNote& m2) const { return m1.start > m2.start; };
+};
+
+
 // Declaration
 class PianorollWidget;
 class PianorollCanvas;
@@ -53,6 +60,9 @@ public:
   void SetTickBar(int tick);
   int GetTickBar();
 
+	int TickToHorizontalPosition(int tick);
+	int HorizontalPositionToTick(int hpos);
+
   double white_width = 60;
   double white_height = 30;
   double black_width = 25;
@@ -67,7 +77,7 @@ public:
 
   double key_heights[127];
 
-  std::vector<MidiNote> notes;
+	std::multiset<MidiNote, _midinote_tick_comp> notes;
   void CalculateNotePositions();
 
 private:
